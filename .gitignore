@@ -1,11 +1,17 @@
-# Python bytecode
-**/__pycache__/
+# Python specifics
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
-**/__pycache__/
-
-# Optional: Ignore environment files if you use them
-.env
-venv/
+.Python
 env/
+venv/
+.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
