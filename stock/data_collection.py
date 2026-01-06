@@ -1,5 +1,5 @@
 import yfinance as yf
-
+import pandas as pd
 company_list=[{"symbol":"INFY.NS","name":"Infosys Limited"},{"symbol":"TCS.NS","name":"Tata Consultancy Services Limited"},{"symbol":"HDFCBANK.NS","name":"HDFC Bank Limited"},]
 def get_company_ticker(company_name):
     for company in company_list:
@@ -22,6 +22,11 @@ def calculate_technical_indicators(df):
      df['volatility_30']=df['daily_return'].rolling(window=30).std()*100
      return df
 
+
+def analyze_stock(symbol):
+    df=get_historicaldata(yf.Ticker(symbol))
+    df=calculate_technical_indicators(df)
+    return df
 
 def main():
     company_name=input("Enter the company name: ")
