@@ -1,14 +1,16 @@
 import yfinance as yf
-import pandas as pd
+
+
+
+_cache={}
+
 company_list=[{"symbol":"INFY.NS","name":"Infosys Limited"},{"symbol":"TCS.NS","name":"Tata Consultancy Services Limited"},{"symbol":"HDFCBANK.NS","name":"HDFC Bank Limited"},]
-def get_company_ticker(company_name):
-    for company in company_list:
-        if company["name"] == company_name:
-            return company["symbol"]
-    return None
 
 
-def get_historicaldata(ticker,period="1y",interval="1d"):
+
+
+def get_historicaldata(symbol,period="1y",interval="1d"):
+    ticker = yf.Ticker(symbol)
     hist = ticker.history(period=period, interval=interval)
     return hist
 
@@ -24,16 +26,56 @@ def calculate_technical_indicators(df):
 
 
 def analyze_stock(symbol):
-    df=get_historicaldata(yf.Ticker(symbol))
-    df=calculate_technical_indicators(df)
+    if symbol in _cache:
+        return _cache[symbol]
+
+    df = get_historicaldata(symbol)
+    if df.empty:
+        return None
+
+    df = calculate_technical_indicators(df)
+    _cache[symbol] = df
     return df
 
-def main():
-    company_name=input("Enter the company name: ")
-    ticker_symbol=get_company_ticker(company_name)
-    ticker=yf.Ticker(ticker_symbol)
-    df=get_historicaldata(ticker)
-    df=calculate_technical_indicators(df)
-    print(df.tail(60))
-if __name__ == "__main__":
-    main()    
+
+def build_summary(df, symbol: str) -> dict:
+    latest = df.iloc[-1]
+
+    close = float(latest["Close"])
+    ma7 = latest.get("moving_average_7")
+    vol = latest.get("volatility_30")
+    high_52 = latest.get("_52_week_high")
+    low_52 = latest.get("_52_week_low")
+
+    # short-term trend
+    short_term_trend = (
+        "up" if ma7 is not None and close > ma7 else "down"
+    )
+
+    # volatility label
+    volatility_label = (
+        None if vol is None else
+        "Low" if vol < 1 else
+        "Moderate" if vol < 2 else
+        "High"
+    )
+
+    # 52-week position
+    position_52w = (
+        round((close - low_52) / (high_52 - low_52) * 100, 2)
+        if high_52 and low_52 and high_52 != low_52
+        else None
+    )
+
+    return {
+        "symbol": symbol,
+        "latest_date": latest.name.date().isoformat(),
+        "latest_close": round(close, 2),
+        "short_term_trend": short_term_trend,
+        "volatility": {
+            "value_percent": round(vol, 2) if vol is not None else None,
+            "label": volatility_label,
+        },
+        "position_in_52_week_range_percent": position_52w,
+    }
+
