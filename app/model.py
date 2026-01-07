@@ -1,4 +1,4 @@
 from pydantic import BaseModel
 
-class stock_request(BaseModel):
+class StockRequest(BaseModel):
     symbol: str
