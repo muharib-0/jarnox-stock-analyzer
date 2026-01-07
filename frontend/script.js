@@ -1,7 +1,13 @@
-const API_BASE = "https://jarnox-stock-analyzer.onrender.com";
+const API_BASE = "http://127.0.0.1:8000";
 
 let chartInstance = null;
 let currentSymbol = null;
+const TIMEFRAME_LABELS = {
+    "30d": "Last 30 Days",
+    "90d": "Last 90 Days",
+    "6mo": "Last 6 Months",
+    "1y": "Last 1 Year",
+};
 
 // DOM Elements
 const companiesContainer = document.getElementById("companiesContainer");
@@ -29,6 +35,16 @@ window.onload = async () => {
         companiesContainer.innerHTML = `<p class="text-red-500 text-sm">Failed to load companies. Is the backend running?</p>`;
     }
 };
+
+function getSelectedTimeframe() {
+    return document.getElementById("timeframeSelect").value;
+}
+
+function updateChartTitle(timeframe) {
+    const label = TIMEFRAME_LABELS[timeframe] || "Custom Range";
+    document.getElementById("chartTitle").textContent =
+        `Price History (${label})`;
+}
 
 function renderCompanyList(companies) {
     companiesContainer.innerHTML = "";
@@ -70,16 +86,18 @@ async function selectCompany(company) {
     statsGrid.classList.remove("hidden");
     chartCard.classList.remove("hidden");
 
+    const timeframe = getSelectedTimeframe();
+    updateChartTitle(timeframe);
     // Fetch Data
     await Promise.all([
-        loadSummary(company.symbol),
-        loadChartData(company.symbol)
+        loadSummary(company.symbol, timeframe),
+        loadChartData(company.symbol, timeframe)
     ]);
 }
 
-async function loadSummary(symbol) {
+async function loadSummary(symbol, timeframe) {
     try {
-        const res = await fetch(`${API_BASE}/summary/${symbol}`);
+        const res = await fetch(`${API_BASE}/summary/${symbol}?timeframe=${timeframe}`);
         const data = await res.json();
         
         document.getElementById("statClose").textContent = `₹${data.latest_close.toLocaleString()}`;
@@ -98,12 +116,12 @@ async function loadSummary(symbol) {
     }
 }
 
-async function loadChartData(symbol) {
+async function loadChartData(symbol, timeframe) {
     try {
         const res = await fetch(`${API_BASE}/data`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ symbol })
+            body: JSON.stringify({ symbol, timeframe })
         });
         const data = await res.json();
         drawChart(data);
@@ -197,6 +215,16 @@ runComparison.onclick = async () => {
         console.error("Comparison error:", error);
     }
 };
+
+document.getElementById("timeframeSelect").addEventListener("change", () => {
+    if (!currentSymbol) return;
+
+    const timeframe = getSelectedTimeframe();
+    updateChartTitle(timeframe);
+    loadSummary(currentSymbol, timeframe);
+    loadChartData(currentSymbol, timeframe);
+});
+
 
 function renderComparison(data) {
     comparisonResults.classList.remove("hidden");
