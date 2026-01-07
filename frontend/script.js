@@ -1,4 +1,4 @@
-const API_BASE = "https://jarnox-stock-backend.onrender.com";
+const API_BASE = "https://jarnox-stock-analyzer.onrender.com";
 
 let chartInstance = null;
 let currentSymbol = null;
