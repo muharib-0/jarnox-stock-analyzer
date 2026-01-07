@@ -1,5 +1,6 @@
 import math
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from stock.data_collection import company_list
 from app.model import stock_request
 from stock.data_collection import analyze_stock, build_summary, compare_summaries
@@ -16,16 +17,24 @@ def clean_nan(obj):
 
 app=FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/companies")
 async def Company_list():
     return company_list
 
 
-@app.post("/analyze_stock")
+@app.post("/data")
 async def get_stock_analysis(request:stock_request):
     df=analyze_stock(request.symbol)
     if df is None or df.empty:
-        return HTTPException(status_code=404, detail="Stock data not found")
+        raise HTTPException(status_code=404, detail="Stock data not found")
     data=df.tail(30).reset_index().to_dict(orient="records")
     cleaned_data=clean_nan(data)
     return cleaned_data
