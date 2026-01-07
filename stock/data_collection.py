@@ -79,3 +79,43 @@ def build_summary(df, symbol: str) -> dict:
         "position_in_52_week_range_percent": position_52w,
     }
 
+def compare_summaries(summary1: dict, summary2: dict) -> dict:
+    symbol1 = summary1["symbol"]
+    symbol2 = summary2["symbol"]
+
+    vol1 = summary1["volatility"]["value_percent"]
+    vol2 = summary2["volatility"]["value_percent"]
+
+    pos1 = summary1["position_in_52_week_range_percent"]
+    pos2 = summary2["position_in_52_week_range_percent"]
+
+    # Compare volatility
+    if vol1 is not None and vol2 is not None:
+        if vol1 > vol2:
+            more_volatile = symbol1
+        elif vol2 > vol1:
+            more_volatile = symbol2
+        else:
+            more_volatile = None
+    else:
+        more_volatile = None
+
+    # Compare 52-week position
+    if pos1 is not None and pos2 is not None:
+        if pos1 > pos2:
+            closer_to_52_week_high = symbol1
+        elif pos2 > pos1:
+            closer_to_52_week_high = symbol2
+        else:
+            closer_to_52_week_high = None
+    else:
+        closer_to_52_week_high = None
+
+    return {
+        "more_volatile": more_volatile,
+        "closer_to_52_week_high": closer_to_52_week_high,
+        "trend_comparison": {
+            symbol1: summary1["short_term_trend"],
+            symbol2: summary2["short_term_trend"]
+        }
+    }
