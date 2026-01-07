@@ -50,6 +50,15 @@
                 <h2 id="selectedCompanyName" class="text-3xl font-bold text-gray-800">Select a company</h2>
                 <p id="selectedCompanySymbol" class="text-gray-500">Choose from the list on the left to see detailed analysis</p>
             </div>
+            <div class="flex items-center gap-2 mt-3">
+  <label for="timeframeSelect" class="text-sm text-gray-500">Timeframe:</label>
+  <select id="timeframeSelect" class="border rounded px-2 py-1 text-sm">
+    <option value="30d">30 Days</option>
+    <option value="90d">90 Days</option>
+    <option value="6mo">6 Months</option>
+    <option value="1y">1 Year</option>
+  </select>
+</div>
 
             <!-- Stats Grid -->
             <div id="statsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 hidden">
@@ -76,8 +85,8 @@
 
             <!-- Chart Card -->
             <div id="chartCard" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8 hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold">Price History (Last 30 Days)</h3>
+                <div  class="flex items-center justify-between mb-6">
+                    <h3 id="chartTitle" class="text-lg font-semibold">Price History (Last )</h3>
                     <div class="flex space-x-2">
                         <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">Daily Close</span>
                     </div>
