@@ -37,7 +37,7 @@ async def Company_list():
 
 @app.post("/data")
 async def get_stock_analysis(request:StockRequest):
-    df=analyze_stock(request.symbol)
+    df=analyze_stock(request.symbol,request.timeframe)
     if df is None or df.empty:
         raise HTTPException(status_code=404, detail="Stock data not found")
     data=df.tail(30).reset_index().to_dict(orient="records")
@@ -45,13 +45,17 @@ async def get_stock_analysis(request:StockRequest):
     return cleaned_data
 
 @app.get("/summary/{symbol}")
-async def get_summary(symbol: str):
-    df = analyze_stock(symbol)
+async def get_summary(symbol: str, timeframe: str = "30d"):
+    df = analyze_stock(symbol, timeframe)
 
     if df is None or df.empty:
-        raise HTTPException(status_code=404, detail="No data found")
+        raise HTTPException(
+            status_code=404,
+            detail="Not enough historical data for selected timeframe"
+        )
 
     return build_summary(df, symbol)
+
 
 
 @app.get("/compare/{symbol1}/{symbol2}")
