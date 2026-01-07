@@ -5,14 +5,7 @@ from stock.data_collection import company_list
 from app.model import StockRequest 
 from stock.data_collection import analyze_stock, build_summary, compare_summaries
 
-def clean_nan(obj):
-    if isinstance(obj, float) and math.isnan(obj):
-        return None
-    if isinstance(obj, dict):
-        return {k: clean_nan(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [clean_nan(i) for i in obj]
-    return obj
+
 
 
 app=FastAPI()
@@ -24,6 +17,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
+def clean_nan(obj):
+    if isinstance(obj, float) and math.isnan(obj):
+        return None
+    if isinstance(obj, dict):
+        return {k: clean_nan(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [clean_nan(i) for i in obj]
+    return obj
+
 
 @app.get("/companies")
 async def Company_list():
