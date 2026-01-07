@@ -2,7 +2,7 @@ import math
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from stock.data_collection import company_list
-from app.model import stock_request
+from app.model import StockRequest 
 from stock.data_collection import analyze_stock, build_summary, compare_summaries
 
 def clean_nan(obj):
@@ -31,7 +31,7 @@ async def Company_list():
 
 
 @app.post("/data")
-async def get_stock_analysis(request:stock_request):
+async def get_stock_analysis(request:StockRequest):
     df=analyze_stock(request.symbol)
     if df is None or df.empty:
         raise HTTPException(status_code=404, detail="Stock data not found")
