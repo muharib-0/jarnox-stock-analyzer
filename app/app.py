@@ -2,7 +2,7 @@ import math
 from fastapi import FastAPI, HTTPException
 from stock.data_collection import company_list
 from app.model import stock_request
-from stock.data_collection import analyze_stock
+from stock.data_collection import analyze_stock, build_summary
 
 def clean_nan(obj):
     if isinstance(obj, float) and math.isnan(obj):
@@ -29,3 +29,14 @@ async def get_stock_analysis(request:stock_request):
     data=df.tail(30).reset_index().to_dict(orient="records")
     cleaned_data=clean_nan(data)
     return cleaned_data
+
+@app.get("/summary/{symbol}")
+async def get_summary(symbol: str):
+    df = analyze_stock(symbol)
+
+    if df is None or df.empty:
+        raise HTTPException(status_code=404, detail="No data found")
+
+    return build_summary(df, symbol)
+
+
