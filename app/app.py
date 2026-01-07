@@ -2,7 +2,7 @@ import math
 from fastapi import FastAPI, HTTPException
 from stock.data_collection import company_list
 from app.model import stock_request
-from stock.data_collection import analyze_stock, build_summary
+from stock.data_collection import analyze_stock, build_summary, compare_summaries
 
 def clean_nan(obj):
     if isinstance(obj, float) and math.isnan(obj):
@@ -40,3 +40,24 @@ async def get_summary(symbol: str):
     return build_summary(df, symbol)
 
 
+@app.get("/compare/{symbol1}/{symbol2}")
+async def compare_stocks(symbol1: str, symbol2: str):
+    df1 = analyze_stock(symbol1)
+    df2 = analyze_stock(symbol2)
+
+    if df1 is None or df1.empty:
+        raise HTTPException(status_code=404, detail=f"No data for {symbol1}")
+
+    if df2 is None or df2.empty:
+        raise HTTPException(status_code=404, detail=f"No data for {symbol2}")
+
+    summary1 = build_summary(df1, symbol1)
+    summary2 = build_summary(df2, symbol2)
+
+    comparison = compare_summaries(summary1, summary2)
+
+    return {
+        "stock_1": summary1,
+        "stock_2": summary2,
+        "comparison": comparison
+    }
